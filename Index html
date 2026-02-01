@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kids Church</title>
+
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#111111">
+
+  <!-- iOS niceties -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+  <style>
+    html, body { height: 100%; margin: 0; background:#000; }
+    .frame { position:fixed; inset:0; border:0; width:100%; height:100%; background:#000; }
+
+    /* Splash overlay */
+    .splash {
+      position: fixed; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: #000;
+      z-index: 10;
+      transition: opacity 250ms ease;
+    }
+    .splash.hide { opacity: 0; pointer-events: none; }
+
+    .card {
+      width: min(360px, 88vw);
+      text-align: center;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color: #fff;
+    }
+    .logo {
+      width: 112px; height: 112px;
+      border-radius: 24px;
+      box-shadow: 0 12px 30px rgba(0,0,0,.45);
+      background: #fff;
+      display: inline-block;
+      overflow: hidden;
+    }
+    .logo img { width: 100%; height: 100%; display:block; }
+
+    .title { margin-top: 14px; font-size: 18px; font-weight: 650; }
+    .muted { margin-top: 6px; opacity: .75; font-size: 14px; }
+    .spinner {
+      margin: 16px auto 0;
+      width: 22px; height: 22px;
+      border: 2px solid rgba(255,255,255,.25);
+      border-top-color: rgba(255,255,255,.9);
+      border-radius: 999px;
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .fallback {
+      margin-top: 18px;
+      display: none;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12);
+      padding: 12px;
+      border-radius: 14px;
+      text-align: left;
+      font-size: 14px;
+      line-height: 1.35;
+    }
+    .btn {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: #fff;
+      color: #000;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 650;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Splash -->
+  <div class="splash" id="splash">
+    <div class="card">
+      <div class="logo">
+        <img src="icons/icon-192.png" alt="Kids Church">
+      </div>
+      <div class="title">Kids Church</div>
+      <div class="muted">Loading…</div>
+      <div class="spinner" aria-label="Loading"></div>
+
+      <div class="fallback" id="fallback">
+        If this keeps spinning, your phone may need to open the app once in the browser to finish sign-in.
+        <br>
+        <a class="btn" id="openLink" href="#" target="_blank" rel="noopener">Open in browser</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Your Apps Script app -->
+  <iframe
+    class="frame"
+    id="appFrame"
+    allow="camera; microphone; clipboard-read; clipboard-write"
+    referrerpolicy="no-referrer"
+    src=""
+  ></iframe>
+
+  <script>
+    // Put your Apps Script /exec URL here
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbzYFTtj_aP6CMAbzxE9U3mSgMLFBCxhTNOQ_7mVul8dWGUqZ6wrFE5-SMTJ1jqCTHew/exec?page=app";
+
+    const frame = document.getElementById("appFrame");
+    const splash = document.getElementById("splash");
+    const fallback = document.getElementById("fallback");
+    const openLink = document.getElementById("openLink");
+
+    frame.src = GAS_URL;
+    openLink.href = GAS_URL;
+
+    // Hide splash when iframe loads
+    frame.addEventListener("load", () => {
+      splash.classList.add("hide");
+      setTimeout(() => splash.remove(), 350);
+    });
+
+    // If it’s taking too long, show the fallback button
+    setTimeout(() => { fallback.style.display = "block"; }, 6000);
+
+    // Register service worker
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./sw.js");
+    }
+  </script>
+</body>
+</html>
